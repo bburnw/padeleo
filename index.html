@@ -1,122 +1,174 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Padel Score</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      background: linear-gradient(135deg,#0f172a,#1e293b);
-      color:white;
-      overflow:hidden;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Padel Score</title>
 
-    h2 { font-weight:700; }
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    .card {
-      border-radius:24px;
-      border:none;
-      box-shadow:0 10px 30px rgba(0,0,0,0.4);
-    }
+<style>
+body {
+  background: radial-gradient(circle at top, #1e293b, #020617);
+  color: white;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
 
-    .team-card {
-      transition:0.3s;
-    }
+h2 {
+  font-weight: 800;
+}
 
-    .team-card:active {
-      transform:scale(0.97);
-    }
+/* CARD */
+.card {
+  border-radius: 22px;
+  border: none;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+}
 
-    .score {
-      font-size:72px;
-      font-weight:800;
-      letter-spacing:2px;
-    }
+/* TEAM */
+.teamA {
+  background: linear-gradient(135deg, #06b6d4, #1d4ed8);
+}
+.teamB {
+  background: linear-gradient(135deg, #f97316, #dc2626);
+}
 
-    .btn-action {
-      padding:18px;
-      font-size:22px;
-      border-radius:14px;
-    }
+.score {
+  font-size: 72px;
+  font-weight: 900;
+}
 
-    .blink { animation: blinkAnim 1s infinite; }
-    @keyframes blinkAnim {
-      0% { background-color: #16a34a; }
-      50% { background-color: #22c55e; }
-      100% { background-color: #16a34a; }
-    }
+.btn-action {
+  padding: 14px;
+  font-size: 18px;
+  border-radius: 14px;
+}
 
-    .info-card {
-      font-size:18px;
-      font-weight:500;
-    }
+/* BLINK */
+.blink {
+  animation: blinkAnim 0.8s infinite;
+}
+@keyframes blinkAnim {
+  50% { filter: brightness(1.5); }
+}
 
-    .header-box {
-      background: rgba(255,255,255,0.05);
-      border-radius:16px;
-      padding:12px;
-    }
+/* INFO */
+.info-card {
+  font-size: 16px;
+  font-weight: 600;
+  background: rgba(255,255,255,0.08);
+}
 
-    canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      pointer-events: none;
-    }
-  </style>
+/* WINNER */
+.winner-banner {
+  margin-top: 10px;
+  padding: 20px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  animation: popIn 0.4s ease;
+}
+
+#winnerText {
+  font-size: 42px;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+@keyframes popIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+</style>
 </head>
+
 <body>
+
 <canvas id="confetti"></canvas>
 
-<div class="container py-3">
-  <h2 class="text-center mb-3">🎾 Padel Score</h2>
+<div class="container py-2">
 
-  <div class="header-box mb-3">
-    <div class="row g-2">
-      <div class="col-6">
-        <select class="form-select" id="mode" onchange="changeMode()">
-          <option value="americano">Americano</option>
-          <option value="mexicano">Mexicano</option>
-        </select>
-      </div>
-      <div class="col-6">
-        <input type="number" id="target" class="form-control" value="21">
-      </div>
-    </div>
-  </div>
+<h2 class="text-center mb-2">🎾 PADEL SCORE</h2>
 
-  <div class="row g-3">
+<!-- INPUT PLAYER -->
+<div class="card p-2 mb-2">
+  <div class="row g-2">
     <div class="col-6">
-      <div id="teamAcard" class="card team-card text-center p-3" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8)">
-        <h5>Team A</h5>
-        <div id="scoreA" class="score">0</div>
-        <div class="d-flex gap-2 mt-3">
-          <button class="btn btn-light w-100 btn-action" onclick="changeScore('A',1)">+1</button>
-          <button class="btn btn-dark w-100 btn-action" onclick="changeScore('A',-1)">-1</button>
-        </div>
-      </div>
+      <input id="a1" class="form-control" placeholder="Team A - Player 1">
     </div>
-
     <div class="col-6">
-      <div id="teamBcard" class="card team-card text-center p-3" style="background:linear-gradient(135deg,#ef4444,#991b1b)">
-        <h5>Team B</h5>
-        <div id="scoreB" class="score">0</div>
-        <div class="d-flex gap-2 mt-3">
-          <button class="btn btn-light w-100 btn-action" onclick="changeScore('B',1)">+1</button>
-          <button class="btn btn-dark w-100 btn-action" onclick="changeScore('B',-1)">-1</button>
-        </div>
+      <input id="a2" class="form-control" placeholder="Team A - Player 2">
+    </div>
+    <div class="col-6">
+      <input id="b1" class="form-control" placeholder="Team B - Player 1">
+    </div>
+    <div class="col-6">
+      <input id="b2" class="form-control" placeholder="Team B - Player 2">
+    </div>
+
+    <div class="col-12">
+      <select id="firstServer" class="form-select">
+        <option value="">-- Pilih Server Pertama --</option>
+        <option value="A1">Team A - Player 1</option>
+        <option value="A2">Team A - Player 2</option>
+        <option value="B1">Team B - Player 1</option>
+        <option value="B2">Team B - Player 2</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- SCORE -->
+<div class="row g-2">
+  
+  <div class="col-6">
+    <div id="teamAcard" class="card teamA text-center p-2">
+      <h5 id="teamAname">Team A</h5>
+      <div id="scoreA" class="score">0</div>
+      <div class="d-flex gap-2 mt-2">
+        <button class="btn btn-light w-100 btn-action" onclick="changeScore('A',1)">+1</button>
+        <button class="btn btn-dark w-100 btn-action" onclick="changeScore('A',-1)">-1</button>
       </div>
     </div>
   </div>
 
-  <div class="text-center mt-3">
-    <button class="btn btn-warning w-100 btn-action" onclick="resetScore()">Reset Score</button>
+  <div class="col-6">
+    <div id="teamBcard" class="card teamB text-center p-2">
+      <h5 id="teamBname">Team B</h5>
+      <div id="scoreB" class="score">0</div>
+      <div class="d-flex gap-2 mt-2">
+        <button class="btn btn-light w-100 btn-action" onclick="changeScore('B',1)">+1</button>
+        <button class="btn btn-dark w-100 btn-action" onclick="changeScore('B',-1)">-1</button>
+      </div>
+    </div>
   </div>
 
-  <div id="infoCard" class="card info-card mt-3 p-3 text-center bg-secondary">
-    <div id="info">Mode: Americano</div>
-  </div>
+</div>
+
+<!-- RESET -->
+<div class="text-center mt-3">
+  <button class="btn btn-warning px-5 btn-action" onclick="resetScore()">RESET</button>
+</div>
+
+<!-- WINNER -->
+<div id="winnerBanner" class="winner-banner text-center d-none">
+  <div id="winnerText"></div>
+</div>
+
+<!-- INFO -->
+<div id="infoCard" class="card info-card mt-2 p-2 text-center">
+  <div id="info">Target: 21</div>
+  <div id="serverInfo">Server: -</div>
+</div>
+
 </div>
 
 <audio id="winSound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
@@ -124,17 +176,15 @@
 <script>
 let scoreA = 0;
 let scoreB = 0;
-let mode = 'americano';
-const MAX_SCORE = 10;
+const TARGET = 21;
+
+let serverOrder = [];
+let currentServerIndex = 0;
 
 const scoreAEl = document.getElementById('scoreA');
 const scoreBEl = document.getElementById('scoreB');
 
-function changeMode() {
-  mode = document.getElementById('mode').value;
-  resetScore();
-}
-
+/* SCORE */
 function changeScore(team, value) {
   if(team === 'A') {
     scoreA = Math.max(0, scoreA + value);
@@ -146,18 +196,74 @@ function changeScore(team, value) {
   checkLogic();
 }
 
+/* PLAYER NAME */
+function updateNames() {
+  let a1 = document.getElementById('a1').value || 'A1';
+  let a2 = document.getElementById('a2').value || 'A2';
+  let b1 = document.getElementById('b1').value || 'B1';
+  let b2 = document.getElementById('b2').value || 'B2';
+
+  document.getElementById('teamAname').innerText = a1 + " / " + a2;
+  document.getElementById('teamBname').innerText = b1 + " / " + b2;
+}
+
+/* SERVER */
+function initServer() {
+  let first = document.getElementById('firstServer').value;
+  if(!first) return;
+
+  serverOrder = ['A1','A2','B1','B2'];
+
+  while(serverOrder[0] !== first) {
+    serverOrder.push(serverOrder.shift());
+  }
+
+  currentServerIndex = 0;
+  updateServerDisplay();
+}
+
+function updateServerDisplay() {
+  if(serverOrder.length === 0) return;
+  let current = serverOrder[currentServerIndex];
+  document.getElementById('serverInfo').innerText = "Server: " + current;
+}
+
+/* LOGIC */
+function checkLogic() {
+  let total = scoreA + scoreB;
+
+  updateNames();
+
+  if(serverOrder.length === 0) {
+    initServer();
+  }
+
+  if(total > 0 && total % 5 === 0) {
+    currentServerIndex = (currentServerIndex + 1) % serverOrder.length;
+    updateServerDisplay();
+  }
+
+  if(total >= TARGET) {
+    let winner = scoreA > scoreB ? 'Team A' : scoreB > scoreA ? 'Team B' : 'DRAW';
+    triggerWinEffect(winner, winner === 'Team A' ? 'A' : winner === 'Team B' ? 'B' : null);
+  } else {
+    document.getElementById('info').innerText = total + " / " + TARGET;
+  }
+}
+
+/* WIN */
 function triggerWinEffect(text, winnerTeam = null) {
-  let infoCard = document.getElementById('infoCard');
-  document.getElementById('info').innerText = text;
+  document.getElementById('info').innerText = "";
 
-  infoCard.classList.remove('bg-secondary');
-  infoCard.classList.add('bg-success','blink');
+  let banner = document.getElementById('winnerBanner');
+  let textEl = document.getElementById('winnerText');
 
-  // reset blink tim
+  textEl.innerText = "🏆 " + text.toUpperCase();
+  banner.classList.remove('d-none');
+
   document.getElementById('teamAcard').classList.remove('blink');
   document.getElementById('teamBcard').classList.remove('blink');
 
-  // kasih blink ke pemenang
   if(winnerTeam === 'A') {
     document.getElementById('teamAcard').classList.add('blink');
   } else if(winnerTeam === 'B') {
@@ -168,53 +274,29 @@ function triggerWinEffect(text, winnerTeam = null) {
   startConfetti();
 }
 
-function checkLogic() {
-  let infoCard = document.getElementById('infoCard');
-  infoCard.classList.remove('blink','bg-success');
-  infoCard.classList.add('bg-secondary');
-
-  if(mode === 'americano') {
-    let target = parseInt(document.getElementById('target').value) || 21;
-    let total = scoreA + scoreB;
-
-    if(total >= target) {
-      let winner = scoreA > scoreB ? 'Team A' : scoreB > scoreA ? 'Team B' : 'Draw';
-      triggerWinEffect(`Match selesai! Pemenang: ${winner}`, winner === 'Team A' ? 'A' : winner === 'Team B' ? 'B' : null);
-    } else {
-      document.getElementById('info').innerText = `Americano: ${total}/${target}`;
-    }
-  } else {
-    if(scoreA >= MAX_SCORE) triggerWinEffect('Team A Menang! 🎉','A');
-    if(scoreB >= MAX_SCORE) triggerWinEffect('Team B Menang! 🎉','B');
-  }
-}
-
-function stopConfetti() {
-  confettiRunning = false;
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-}
-
+/* RESET */
 function resetScore() {
   scoreA = 0;
   scoreB = 0;
+
   scoreAEl.innerText = 0;
   scoreBEl.innerText = 0;
 
-  let infoCard = document.getElementById('infoCard');
-  infoCard.classList.remove('blink','bg-success');
-  infoCard.classList.add('bg-secondary');
+  document.getElementById('info').innerText = 'Target: 21';
 
-  // reset blink tim
   document.getElementById('teamAcard').classList.remove('blink');
   document.getElementById('teamBcard').classList.remove('blink');
 
-  document.getElementById('info').innerText = 'Mode: ' + mode;
+  document.getElementById('winnerBanner').classList.add('d-none');
 
-  // stop confetti saat reset
+  serverOrder = [];
+  currentServerIndex = 0;
+  document.getElementById('serverInfo').innerText = "Server: -";
+
   stopConfetti();
 }
 
-// CONFETTI
+/* CONFETTI */
 const canvas = document.getElementById('confetti');
 const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
@@ -238,19 +320,29 @@ function animateConfetti() {
   if(!confettiRunning) return;
 
   ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  const colors = ['#22c55e','#3b82f6','#f97316','#eab308','#ec4899'];
+
   pieces.forEach(p => {
     ctx.beginPath();
-    const colors = ['#ef4444','#f43f5e','#ec4899','#fb7185','#be123c'];
     ctx.fillStyle = colors[Math.floor(Math.random()*colors.length)];
     ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
     ctx.fill();
   });
+
   pieces.forEach(p => {
     p.y += Math.cos(p.d)+2;
     if(p.y > canvas.height) p.y = 0;
   });
+
   requestAnimationFrame(animateConfetti);
 }
+
+function stopConfetti() {
+  confettiRunning = false;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+}
 </script>
+
 </body>
 </html>
