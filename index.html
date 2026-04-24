@@ -138,6 +138,7 @@ h2 {
 <div id="infoCard" class="card info-card mt-3 p-3 text-center">
   <div id="info">0 / 21</div>
   <div id="serverInfo">Server: -</div>
+  <div id="nextServerInfo">Next: -</div>
   <div id="serveCounter">Serve: 0 / 5</div>
 </div>
 
@@ -169,6 +170,12 @@ function changeScore(team, value) {
 
   if(serverOrder.length === 0) initServer();
 
+  // ===== VALIDASI -1 =====
+  if(value === -1) {
+    if(team === 'A' && scoreA === 0) return;
+    if(team === 'B' && scoreB === 0) return;
+  }
+
   // ===== UPDATE SCORE =====
   if(team === 'A') {
     scoreA = Math.max(0, scoreA + value);
@@ -179,25 +186,26 @@ function changeScore(team, value) {
   scoreAEl.innerText = scoreA;
   scoreBEl.innerText = scoreB;
 
-  // ===== UPDATE SERVE =====
-  serveCount += value;
+  // update score
+  scoreAEl.innerText = scoreA;
+  scoreBEl.innerText = scoreB;
 
-  // 🔥 MAJU (lebih dari 5)
-  if(serveCount > 5) {
-    currentServerIndex = (currentServerIndex + 1) % serverOrder.length;
-    serveCount = 1; // rally pertama server baru
-    updateServerDisplay();
+  // 🔥 LOGIKA BARU DI SINI
+  let total = scoreA + scoreB;
+
+  if(total === 0) {
+    serveCount = 0;
+    currentServerIndex = 0;
+  } else {
+    let block = Math.floor((total - 1) / 5);
+
+    currentServerIndex = block % serverOrder.length;
+    serveCount = ((total - 1) % 5) + 1;
   }
 
-  // 🔥 MUNDUR (kurang dari 0)
-  if(serveCount < 0) {
-    currentServerIndex =
-      (currentServerIndex - 1 + serverOrder.length) % serverOrder.length;
-    serveCount = 4; // kembali ke rally ke-4 server sebelumnya
-    updateServerDisplay();
-  }
+updateServerDisplay();
+updateServeCounter();
 
-  updateServeCounter();
   checkLogic();
 }
 
@@ -241,10 +249,23 @@ function initServer() {
 function updateServerDisplay() {
   if(serverOrder.length === 0) return;
 
-  let code = serverOrder[currentServerIndex];
-  let name = getPlayerName(code);
+  let currentCode = serverOrder[currentServerIndex];
+  let currentName = getPlayerName(currentCode);
 
-  document.getElementById('serverInfo').innerText = "Server: " + name;
+  document.getElementById('serverInfo').innerText =
+    "Server: " + currentName;
+
+  // 🔥 jika game selesai → hilangkan next
+  if(gameFinished) {
+    document.getElementById('nextServerInfo').innerText = "";
+    return;
+  }
+
+  let nextCode = serverOrder[(currentServerIndex + 1) % serverOrder.length];
+  let nextName = getPlayerName(nextCode);
+
+  document.getElementById('nextServerInfo').innerText =
+    "Next: " + nextName;
 }
 
 /* SERVE COUNTER */
@@ -290,6 +311,11 @@ function showWinner(text) {
   } else if(text === 'Team B') {
     document.getElementById('teamBcard').classList.add('blink');
   }
+
+  // 🔥 HIDE INFO SAAT SELESAI
+  document.getElementById('nextServerInfo').style.display = 'none';
+  document.getElementById('serverInfo').style.display = 'none';
+  document.getElementById('serveCounter').style.display = 'none';
 }
 
 /* RESET */
@@ -307,7 +333,14 @@ function resetScore() {
 
   document.getElementById('info').innerText = '0 / 21';
   document.getElementById('serverInfo').innerText = 'Server: -';
+  document.getElementById('nextServerInfo').innerText = 'Next: -';
   document.getElementById('serveCounter').innerText = 'Serve: 0 / 5';
+
+  // ✅ munculkan lagi setelah reset
+  document.getElementById('nextServerInfo').style.display = 'block';
+  document.getElementById('serveCounter').style.display = 'block';
+
+  document.getElementById('nextServerInfo').innerText = 'Next: -';
 
   document.getElementById('winnerBanner').classList.add('d-none');
 
