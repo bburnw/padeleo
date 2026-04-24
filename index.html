@@ -13,19 +13,16 @@ body {
   color: #111;
 }
 
-/* TITLE */
 h2 {
   font-weight: 800;
 }
 
-/* CARD */
 .card {
   border-radius: 20px;
   border: none;
   box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
 
-/* TEAM */
 .teamA {
   background: linear-gradient(135deg, #38bdf8, #2563eb);
   color: white;
@@ -35,27 +32,23 @@ h2 {
   color: white;
 }
 
-/* SCORE */
 .score {
   font-size: 70px;
   font-weight: 900;
 }
 
-/* BUTTON */
 .btn-action {
   padding: 14px;
   font-size: 18px;
   border-radius: 14px;
 }
 
-/* INFO */
 .info-card {
   font-size: 20px;
   font-weight: 700;
   background: #f1f5f9;
 }
 
-/* WINNER */
 .winner-banner {
   margin-top: 10px;
   padding: 20px;
@@ -70,7 +63,6 @@ h2 {
   font-weight: 900;
 }
 
-/* BLINK */
 .blink {
   animation: blinkAnim 0.8s infinite;
 }
@@ -104,7 +96,7 @@ h2 {
 
     <div class="col-12">
       <select id="firstServer" class="form-select">
-  <option value="">-- Pilih Server Pertama --</option>
+        <option value="">-- Pilih Server Pertama --</option>
       </select>
     </div>
   </div>
@@ -142,10 +134,11 @@ h2 {
   <button class="btn btn-warning px-5 btn-action" onclick="resetScore()">RESET</button>
 </div>
 
-<!-- INFO SCORE -->
+<!-- INFO -->
 <div id="infoCard" class="card info-card mt-3 p-3 text-center">
   <div id="info">0 / 21</div>
   <div id="serverInfo">Server: -</div>
+  <div id="serveCounter">Serve: 0 / 5</div>
 </div>
 
 <!-- WINNER -->
@@ -164,14 +157,19 @@ let serverOrder = [];
 let currentServerIndex = 0;
 let gameFinished = false;
 
+let serveCount = 0;
+
 const scoreAEl = document.getElementById('scoreA');
 const scoreBEl = document.getElementById('scoreB');
 
 /* SCORE */
 function changeScore(team, value) {
 
-  if(gameFinished) return; // 🔒 LOCK saat selesai
+  if(gameFinished) return;
 
+  if(serverOrder.length === 0) initServer();
+
+  // ===== UPDATE SCORE =====
   if(team === 'A') {
     scoreA = Math.max(0, scoreA + value);
   } else {
@@ -181,6 +179,25 @@ function changeScore(team, value) {
   scoreAEl.innerText = scoreA;
   scoreBEl.innerText = scoreB;
 
+  // ===== UPDATE SERVE =====
+  serveCount += value;
+
+  // 🔥 MAJU (lebih dari 5)
+  if(serveCount > 5) {
+    currentServerIndex = (currentServerIndex + 1) % serverOrder.length;
+    serveCount = 1; // rally pertama server baru
+    updateServerDisplay();
+  }
+
+  // 🔥 MUNDUR (kurang dari 0)
+  if(serveCount < 0) {
+    currentServerIndex =
+      (currentServerIndex - 1 + serverOrder.length) % serverOrder.length;
+    serveCount = 4; // kembali ke rally ke-4 server sebelumnya
+    updateServerDisplay();
+  }
+
+  updateServeCounter();
   checkLogic();
 }
 
@@ -200,10 +217,6 @@ function initServer() {
   let first = document.getElementById('firstServer').value;
   if(!first) return;
 
-  // BASE ORDER DIAGONAL
-  let baseOrder = ['A1','B1','A2','B2'];
-
-  // Cari pasangan diagonal dari first
   let diagonalMap = {
     A1: 'B1',
     B1: 'A2',
@@ -211,7 +224,6 @@ function initServer() {
     B2: 'A1'
   };
 
-  // Susun order mulai dari first
   serverOrder = [];
   let current = first;
 
@@ -221,7 +233,9 @@ function initServer() {
   }
 
   currentServerIndex = 0;
+  serveCount = 0;
   updateServerDisplay();
+  updateServeCounter();
 }
 
 function updateServerDisplay() {
@@ -230,8 +244,13 @@ function updateServerDisplay() {
   let code = serverOrder[currentServerIndex];
   let name = getPlayerName(code);
 
-  document.getElementById('serverInfo').innerText =
-    "Server: " + name;
+  document.getElementById('serverInfo').innerText = "Server: " + name;
+}
+
+/* SERVE COUNTER */
+function updateServeCounter() {
+  document.getElementById('serveCounter').innerText =
+    "Serve: " + serveCount + " / 5";
 }
 
 /* LOGIC */
@@ -241,18 +260,8 @@ function checkLogic() {
 
   updateNames();
 
-  if(serverOrder.length === 0) initServer();
-
-  // AUTO ROTATE SERVER
-  if(total > 1 && (total - 1) % 5 === 0) {
-    currentServerIndex = (currentServerIndex + 1) % serverOrder.length;
-    updateServerDisplay();
-  }
-
-  // UPDATE SCORE INFO
   document.getElementById('info').innerText = total + " / " + TARGET;
 
-  // WIN CONDITION
   if(total >= TARGET) {
     gameFinished = true;
 
@@ -289,19 +298,22 @@ function resetScore() {
   scoreB = 0;
   gameFinished = false;
 
-  // reset score
+  serveCount = 0;
+  serverOrder = [];
+  currentServerIndex = 0;
+
   scoreAEl.innerText = 0;
   scoreBEl.innerText = 0;
 
   document.getElementById('info').innerText = '0 / 21';
+  document.getElementById('serverInfo').innerText = 'Server: -';
+  document.getElementById('serveCounter').innerText = 'Serve: 0 / 5';
 
-  // reset winner
   document.getElementById('winnerBanner').classList.add('d-none');
 
   document.getElementById('teamAcard').classList.remove('blink');
   document.getElementById('teamBcard').classList.remove('blink');
 
-  // 🔥 RESET NAMA PLAYER
   document.getElementById('a1').value = '';
   document.getElementById('a2').value = '';
   document.getElementById('b1').value = '';
@@ -310,27 +322,17 @@ function resetScore() {
   document.getElementById('teamAname').innerText = 'Team A';
   document.getElementById('teamBname').innerText = 'Team B';
 
-  // 🔥 RESET SERVER
   document.getElementById('firstServer').value = '';
-  serverOrder = [];
-  currentServerIndex = 0;
-  document.getElementById('serverInfo').innerText = "Server: -";
 }
 
+/* UTIL */
 function getPlayerName(code) {
   let a1 = document.getElementById('a1').value || 'A1';
   let a2 = document.getElementById('a2').value || 'A2';
   let b1 = document.getElementById('b1').value || 'B1';
   let b2 = document.getElementById('b2').value || 'B2';
 
-  const map = {
-    A1: a1,
-    A2: a2,
-    B1: b1,
-    B2: b2
-  };
-
-  return map[code] || code;
+  return {A1:a1,A2:a2,B1:b1,B2:b2}[code];
 }
 
 function updateServerOptions() {
@@ -340,8 +342,7 @@ function updateServerOptions() {
   let b2 = document.getElementById('b2').value || 'B2';
 
   let select = document.getElementById('firstServer');
-
-  let currentValue = select.value; // biar gak reset pilihan user
+  let currentValue = select.value;
 
   select.innerHTML = `
     <option value="">-- Pilih Server Pertama --</option>
@@ -351,7 +352,7 @@ function updateServerOptions() {
     <option value="B2">${b2}</option>
   `;
 
-  select.value = currentValue; // restore pilihan kalau masih ada
+  select.value = currentValue;
 }
 
 document.getElementById('a1').addEventListener('input', updateServerOptions);
@@ -360,7 +361,6 @@ document.getElementById('b1').addEventListener('input', updateServerOptions);
 document.getElementById('b2').addEventListener('input', updateServerOptions);
 
 updateServerOptions();
-
 </script>
 
 </body>
