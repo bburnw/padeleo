@@ -104,11 +104,7 @@ h2 {
 
     <div class="col-12">
       <select id="firstServer" class="form-select">
-        <option value="">-- Pilih Server Pertama --</option>
-        <option value="A1">Team A - Player 1</option>
-        <option value="A2">Team A - Player 2</option>
-        <option value="B1">Team B - Player 1</option>
-        <option value="B2">Team B - Player 2</option>
+  <option value="">-- Pilih Server Pertama --</option>
       </select>
     </div>
   </div>
@@ -293,19 +289,31 @@ function resetScore() {
   scoreB = 0;
   gameFinished = false;
 
+  // reset score
   scoreAEl.innerText = 0;
   scoreBEl.innerText = 0;
 
   document.getElementById('info').innerText = '0 / 21';
 
+  // reset winner
   document.getElementById('winnerBanner').classList.add('d-none');
 
   document.getElementById('teamAcard').classList.remove('blink');
   document.getElementById('teamBcard').classList.remove('blink');
 
+  // 🔥 RESET NAMA PLAYER
+  document.getElementById('a1').value = '';
+  document.getElementById('a2').value = '';
+  document.getElementById('b1').value = '';
+  document.getElementById('b2').value = '';
+
+  document.getElementById('teamAname').innerText = 'Team A';
+  document.getElementById('teamBname').innerText = 'Team B';
+
+  // 🔥 RESET SERVER
+  document.getElementById('firstServer').value = '';
   serverOrder = [];
   currentServerIndex = 0;
-
   document.getElementById('serverInfo').innerText = "Server: -";
 }
 
@@ -324,6 +332,34 @@ function getPlayerName(code) {
 
   return map[code] || code;
 }
+
+function updateServerOptions() {
+  let a1 = document.getElementById('a1').value || 'A1';
+  let a2 = document.getElementById('a2').value || 'A2';
+  let b1 = document.getElementById('b1').value || 'B1';
+  let b2 = document.getElementById('b2').value || 'B2';
+
+  let select = document.getElementById('firstServer');
+
+  let currentValue = select.value; // biar gak reset pilihan user
+
+  select.innerHTML = `
+    <option value="">-- Pilih Server Pertama --</option>
+    <option value="A1">${a1}</option>
+    <option value="A2">${a2}</option>
+    <option value="B1">${b1}</option>
+    <option value="B2">${b2}</option>
+  `;
+
+  select.value = currentValue; // restore pilihan kalau masih ada
+}
+
+document.getElementById('a1').addEventListener('input', updateServerOptions);
+document.getElementById('a2').addEventListener('input', updateServerOptions);
+document.getElementById('b1').addEventListener('input', updateServerOptions);
+document.getElementById('b2').addEventListener('input', updateServerOptions);
+
+updateServerOptions();
 
 </script>
 
