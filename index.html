@@ -9,55 +9,50 @@
 
 <style>
 body {
-  background: radial-gradient(circle at top, #1e293b, #020617);
-  color: white;
-  overflow-x: hidden;
-  overflow-y: auto;
+  background: #ffffff;
+  color: #111;
 }
 
+/* TITLE */
 h2 {
   font-weight: 800;
 }
 
 /* CARD */
 .card {
-  border-radius: 22px;
+  border-radius: 20px;
   border: none;
-  box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
 
 /* TEAM */
 .teamA {
-  background: linear-gradient(135deg, #06b6d4, #1d4ed8);
+  background: linear-gradient(135deg, #38bdf8, #2563eb);
+  color: white;
 }
 .teamB {
-  background: linear-gradient(135deg, #f97316, #dc2626);
+  background: linear-gradient(135deg, #fb923c, #dc2626);
+  color: white;
 }
 
+/* SCORE */
 .score {
-  font-size: 72px;
+  font-size: 70px;
   font-weight: 900;
 }
 
+/* BUTTON */
 .btn-action {
   padding: 14px;
   font-size: 18px;
   border-radius: 14px;
 }
 
-/* BLINK */
-.blink {
-  animation: blinkAnim 0.8s infinite;
-}
-@keyframes blinkAnim {
-  50% { filter: brightness(1.5); }
-}
-
 /* INFO */
 .info-card {
-  font-size: 16px;
-  font-weight: 600;
-  background: rgba(255,255,255,0.08);
+  font-size: 20px;
+  font-weight: 700;
+  background: #f1f5f9;
 }
 
 /* WINNER */
@@ -66,40 +61,33 @@ h2 {
   padding: 20px;
   border-radius: 20px;
   background: linear-gradient(135deg, #22c55e, #16a34a);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  animation: popIn 0.4s ease;
+  color: white;
+  text-align: center;
 }
 
 #winnerText {
-  font-size: 42px;
+  font-size: 40px;
   font-weight: 900;
-  letter-spacing: 2px;
 }
 
-@keyframes popIn {
-  from { transform: scale(0.8); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+/* BLINK */
+.blink {
+  animation: blinkAnim 0.8s infinite;
 }
-
-canvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-  pointer-events: none;
+@keyframes blinkAnim {
+  50% { transform: scale(1.05); }
 }
 </style>
 </head>
 
 <body>
 
-<canvas id="confetti"></canvas>
+<div class="container py-3">
 
-<div class="container py-2">
+<h2 class="text-center mb-3">🎾 PADEL SCORE</h2>
 
-<h2 class="text-center mb-2">🎾 PADEL SCORE</h2>
-
-<!-- INPUT PLAYER -->
-<div class="card p-2 mb-2">
+<!-- INPUT -->
+<div class="card p-3 mb-3">
   <div class="row g-2">
     <div class="col-6">
       <input id="a1" class="form-control" placeholder="Team A - Player 1">
@@ -128,9 +116,9 @@ canvas {
 
 <!-- SCORE -->
 <div class="row g-2">
-  
+
   <div class="col-6">
-    <div id="teamAcard" class="card teamA text-center p-2">
+    <div id="teamAcard" class="card teamA text-center p-3">
       <h5 id="teamAname">Team A</h5>
       <div id="scoreA" class="score">0</div>
       <div class="d-flex gap-2 mt-2">
@@ -141,7 +129,7 @@ canvas {
   </div>
 
   <div class="col-6">
-    <div id="teamBcard" class="card teamB text-center p-2">
+    <div id="teamBcard" class="card teamB text-center p-3">
       <h5 id="teamBname">Team B</h5>
       <div id="scoreB" class="score">0</div>
       <div class="d-flex gap-2 mt-2">
@@ -158,20 +146,18 @@ canvas {
   <button class="btn btn-warning px-5 btn-action" onclick="resetScore()">RESET</button>
 </div>
 
-<!-- WINNER -->
-<div id="winnerBanner" class="winner-banner text-center d-none">
-  <div id="winnerText"></div>
-</div>
-
-<!-- INFO -->
-<div id="infoCard" class="card info-card mt-2 p-2 text-center">
-  <div id="info">Target: 21</div>
+<!-- INFO SCORE -->
+<div id="infoCard" class="card info-card mt-3 p-3 text-center">
+  <div id="info">0 / 21</div>
   <div id="serverInfo">Server: -</div>
 </div>
 
+<!-- WINNER -->
+<div id="winnerBanner" class="winner-banner d-none">
+  <div id="winnerText"></div>
 </div>
 
-<audio id="winSound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+</div>
 
 <script>
 let scoreA = 0;
@@ -180,23 +166,29 @@ const TARGET = 21;
 
 let serverOrder = [];
 let currentServerIndex = 0;
+let gameFinished = false;
 
 const scoreAEl = document.getElementById('scoreA');
 const scoreBEl = document.getElementById('scoreB');
 
 /* SCORE */
 function changeScore(team, value) {
+
+  if(gameFinished) return; // 🔒 LOCK saat selesai
+
   if(team === 'A') {
     scoreA = Math.max(0, scoreA + value);
-    scoreAEl.innerText = scoreA;
   } else {
     scoreB = Math.max(0, scoreB + value);
-    scoreBEl.innerText = scoreB;
   }
+
+  scoreAEl.innerText = scoreA;
+  scoreBEl.innerText = scoreB;
+
   checkLogic();
 }
 
-/* PLAYER NAME */
+/* PLAYER */
 function updateNames() {
   let a1 = document.getElementById('a1').value || 'A1';
   let a2 = document.getElementById('a2').value || 'A2';
@@ -212,10 +204,24 @@ function initServer() {
   let first = document.getElementById('firstServer').value;
   if(!first) return;
 
-  serverOrder = ['A1','A2','B1','B2'];
+  // BASE ORDER DIAGONAL
+  let baseOrder = ['A1','B1','A2','B2'];
 
-  while(serverOrder[0] !== first) {
-    serverOrder.push(serverOrder.shift());
+  // Cari pasangan diagonal dari first
+  let diagonalMap = {
+    A1: 'B1',
+    B1: 'A2',
+    A2: 'B2',
+    B2: 'A1'
+  };
+
+  // Susun order mulai dari first
+  serverOrder = [];
+  let current = first;
+
+  for(let i=0; i<4; i++) {
+    serverOrder.push(current);
+    current = diagonalMap[current];
   }
 
   currentServerIndex = 0;
@@ -224,36 +230,46 @@ function initServer() {
 
 function updateServerDisplay() {
   if(serverOrder.length === 0) return;
-  let current = serverOrder[currentServerIndex];
-  document.getElementById('serverInfo').innerText = "Server: " + current;
+
+  let code = serverOrder[currentServerIndex];
+  let name = getPlayerName(code);
+
+  document.getElementById('serverInfo').innerText =
+    "Server: " + name;
 }
 
 /* LOGIC */
 function checkLogic() {
+
   let total = scoreA + scoreB;
 
   updateNames();
 
-  if(serverOrder.length === 0) {
-    initServer();
-  }
+  if(serverOrder.length === 0) initServer();
 
+  // AUTO ROTATE SERVER
   if(total > 0 && total % 5 === 0) {
     currentServerIndex = (currentServerIndex + 1) % serverOrder.length;
     updateServerDisplay();
   }
 
+  // UPDATE SCORE INFO
+  document.getElementById('info').innerText = total + " / " + TARGET;
+
+  // WIN CONDITION
   if(total >= TARGET) {
-    let winner = scoreA > scoreB ? 'Team A' : scoreB > scoreA ? 'Team B' : 'DRAW';
-    triggerWinEffect(winner, winner === 'Team A' ? 'A' : winner === 'Team B' ? 'B' : null);
-  } else {
-    document.getElementById('info').innerText = total + " / " + TARGET;
+    gameFinished = true;
+
+    let winner =
+      scoreA > scoreB ? 'Team A' :
+      scoreB > scoreA ? 'Team B' : 'DRAW';
+
+    showWinner(winner);
   }
 }
 
 /* WIN */
-function triggerWinEffect(text, winnerTeam = null) {
-  document.getElementById('info').innerText = "";
+function showWinner(text) {
 
   let banner = document.getElementById('winnerBanner');
   let textEl = document.getElementById('winnerText');
@@ -264,84 +280,51 @@ function triggerWinEffect(text, winnerTeam = null) {
   document.getElementById('teamAcard').classList.remove('blink');
   document.getElementById('teamBcard').classList.remove('blink');
 
-  if(winnerTeam === 'A') {
+  if(text === 'Team A') {
     document.getElementById('teamAcard').classList.add('blink');
-  } else if(winnerTeam === 'B') {
+  } else if(text === 'Team B') {
     document.getElementById('teamBcard').classList.add('blink');
   }
-
-  document.getElementById('winSound').play();
-  startConfetti();
 }
 
 /* RESET */
 function resetScore() {
   scoreA = 0;
   scoreB = 0;
+  gameFinished = false;
 
   scoreAEl.innerText = 0;
   scoreBEl.innerText = 0;
 
-  document.getElementById('info').innerText = 'Target: 21';
+  document.getElementById('info').innerText = '0 / 21';
+
+  document.getElementById('winnerBanner').classList.add('d-none');
 
   document.getElementById('teamAcard').classList.remove('blink');
   document.getElementById('teamBcard').classList.remove('blink');
 
-  document.getElementById('winnerBanner').classList.add('d-none');
-
   serverOrder = [];
   currentServerIndex = 0;
+
   document.getElementById('serverInfo').innerText = "Server: -";
-
-  stopConfetti();
 }
 
-/* CONFETTI */
-const canvas = document.getElementById('confetti');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+function getPlayerName(code) {
+  let a1 = document.getElementById('a1').value || 'A1';
+  let a2 = document.getElementById('a2').value || 'A2';
+  let b1 = document.getElementById('b1').value || 'B1';
+  let b2 = document.getElementById('b2').value || 'B2';
 
-let pieces = [];
-let confettiRunning = false;
+  const map = {
+    A1: a1,
+    A2: a2,
+    B1: b1,
+    B2: b2
+  };
 
-function startConfetti() {
-  confettiRunning = true;
-  pieces = Array.from({length:120}, () => ({
-    x: Math.random()*canvas.width,
-    y: Math.random()*canvas.height,
-    r: Math.random()*6+4,
-    d: Math.random()*50
-  }));
-  animateConfetti();
+  return map[code] || code;
 }
 
-function animateConfetti() {
-  if(!confettiRunning) return;
-
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  const colors = ['#22c55e','#3b82f6','#f97316','#eab308','#ec4899'];
-
-  pieces.forEach(p => {
-    ctx.beginPath();
-    ctx.fillStyle = colors[Math.floor(Math.random()*colors.length)];
-    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    ctx.fill();
-  });
-
-  pieces.forEach(p => {
-    p.y += Math.cos(p.d)+2;
-    if(p.y > canvas.height) p.y = 0;
-  });
-
-  requestAnimationFrame(animateConfetti);
-}
-
-function stopConfetti() {
-  confettiRunning = false;
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-}
 </script>
 
 </body>
